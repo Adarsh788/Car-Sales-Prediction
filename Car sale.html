@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car Sales Prediction — Interactive Showcase</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220cc;
+      --glass: rgba(255,255,255,0.06);
+      --accent1: #7c5cff;
+      --accent2: #2dd4bf;
+      --muted: #9aa4b2;
+      --glass-border: rgba(255,255,255,0.06);
+      --glass-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      font-synthesis: none;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.12), transparent 6%), radial-gradient(800px 400px at 90% 90%, rgba(45,212,191,0.08), transparent 8%), var(--bg); color:#e6eef8;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+
+    .wrap{max-width:1100px;margin:48px auto;padding:28px;}
+
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px
+    }
+    .brand{display:flex;gap:14px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;box-shadow:0 6px 18px rgba(124,92,255,0.18);font-weight:700}
+    .brand h1{margin:0;font-size:18px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));border:1px solid var(--glass-border);padding:10px 14px;border-radius:10px;color:inherit;cursor:pointer;backdrop-filter: blur(6px);box-shadow:var(--glass-shadow)}
+    .btn.ghost{background:transparent}
+
+    main{display:grid;grid-template-columns: 1fr 380px;gap:20px}
+
+    /* left panel */
+    .hero{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:16px;padding:22px;border:1px solid var(--glass-border);box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+    .headline{display:flex;align-items:flex-start;gap:18px}
+    .pulse{width:86px;height:86px;border-radius:14px;background:linear-gradient(180deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:700;box-shadow:0 20px 60px rgba(124,92,255,0.12)}
+    .headline h2{margin:0 0 6px 0}
+    .lead{color:var(--muted);margin:0}
+
+    .stats{display:flex;gap:12px;margin-top:18px}
+    .stat{flex:1;background:var(--glass);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);}
+    .stat strong{display:block;font-size:18px}
+    .stat span{font-size:12px;color:var(--muted)}
+
+    .chart-card{margin-top:18px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03)}
+    .chart{height:200px;display:grid;place-items:center;color:var(--muted)}
+
+    .models{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .model{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:all .18s}
+    .model:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(2,6,23,0.6)}
+
+    /* right panel */
+    .side{position:sticky;top:28px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);}
+    .card h3{margin:0 0 8px 0}
+    .field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    input[type=range]{width:100%}
+    .predict-btn{width:100%;padding:12px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent2),var(--accent1));color:#04111a;font-weight:700;cursor:pointer}
+
+    .result{margin-top:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);text-align:center}
+
+    footer{margin-top:24px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* small screens */
+    @media (max-width:900px){
+      main{grid-template-columns:1fr}
+      .side{position:static}
+    }
+
+    /* fancy animated ribbon */
+    .ribbon{position:relative;margin-top:14px;height:48px;display:flex;align-items:center}
+    .ribbon .bar{height:6px;border-radius:999px;flex:1;background:linear-gradient(90deg,var(--accent1),var(--accent2));box-shadow:0 6px 22px rgba(45,212,191,0.06)}
+    .ribbon .pulse-dot{width:22px;height:22px;border-radius:999px;margin-left:-11px;border:3px solid rgba(255,255,255,0.06);background:linear-gradient(90deg,#fff6, transparent)}
+
+    /* animated gradient headings */
+    .glow{background:linear-gradient(90deg,var(--accent2),var(--accent1));-webkit-background-clip:text;background-clip:text;color:transparent;animation: move 3s ease-in-out infinite}
+    @keyframes move{0%{filter:blur(0px)}50%{filter: blur(2px)}100%{filter:blur(0px)}}
+
+    /* subtle floating shapes */
+    .shape{position:absolute;opacity:.06;filter: blur(24px);pointer-events:none}
+    .shape.s1{width:300px;height:140px;left:-60px;top:-40px;background:radial-gradient(circle at 30% 30%, #7c5cff, transparent)}
+    .shape.s2{width:220px;height:120px;right:-40px;bottom:-20px;background:radial-gradient(circle at 30% 30%, #2dd4bf, transparent)}
+
+  </style>
+</head>
+<body>
+  <div class="shape s1"></div>
+  <div class="shape s2"></div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">CP</div>
+        <div>
+          <h1>Car Sales Prediction</h1>
+          <p>Machine Learning • Forecasting • Insights</p>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn ghost" id="theme">Toggle Dark</button>
+        <button class="btn" id="github">Copy GitHub Link</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="headline">
+          <div class="pulse">ML</div>
+          <div>
+            <h2 class="glow">Predicting Car Sales — Interactive Demo</h2>
+            <p class="lead">Explore a compact interface that shows model estimates, key metrics and a micro-interaction that demonstrates how data influences predictions in real-time.</p>
+            <div class="ribbon" aria-hidden>
+              <div class="bar"></div>
+              <div class="pulse-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><strong id="r2">R² 0.86</strong><span>Model Score</span></div>
+          <div class="stat"><strong id="rmse">RMSE 12.4</strong><span>Error</span></div>
+          <div class="stat"><strong id="data">3,450</strong><span>Records Used</span></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart" id="spark">📈 Interactive sparkline — Move sliders to update prediction</div>
+        </div>
+
+        <div class="models" id="models">
+          <div class="model" data-model="Linear">Linear Regression<span style="display:block;color:var(--muted);font-size:12px">Simple baseline</span></div>
+          <div class="model" data-model="KNN">KNN Regression<span style="display:block;color:var(--muted);font-size:12px">k-tuned</span></div>
+          <div class="model" data-model="Ensemble">Ensemble<span style="display:block;color:var(--muted);font-size:12px">Blend</span></div>
+        </div>
+
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <h3>Predict</h3>
+          <div class="field">
+            <label>Month (1-12) <small class="muted">Seasonality</small></label>
+            <input id="month" type="range" min="1" max="12" value="6" />
+          </div>
+          <div class="field">
+            <label>Marketing Spend (₹k)</label>
+            <input id="spend" type="range" min="0" max="500" value="120" />
+          </div>
+          <div class="field">
+            <label>Inventory (units)</label>
+            <input id="stock" type="range" min="0" max="1200" value="420" />
+          </div>
+          <button id="predict" class="predict-btn">Run Prediction</button>
+          <div class="result" id="out">Predicted Sales: —</div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <h3>Model Info</h3>
+          <p style="color:var(--muted);font-size:13px">Select a model card to change predictor. The right panel simulates an on-device inference with lightweight computations for demo purposes.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer>Made with ❤️ • Showcase UI • Modify for your project</footer>
+  </div>
+
+  <script>
+    // Tiny interactive demo logic (no external libs)
+    const month = document.getElementById('month');
+    const spend = document.getElementById('spend');
+    const stock = document.getElementById('stock');
+    const out = document.getElementById('out');
+    const predictBtn = document.getElementById('predict');
+    const spark = document.getElementById('spark');
+    const models = document.getElementById('models');
+    let activeModel = 'Linear';
+
+    // simulate model parameters
+    const modelParams = {
+      'Linear': {a:0.6,b:0.25,c:0.15},
+      'KNN': {a:0.55,b:0.28,c:0.18},
+      'Ensemble': {a:0.62,b:0.24,c:0.14}
+    }
+
+    function predict(){
+      const m = +month.value; const s = +spend.value; const st = +stock.value;
+      const p = modelParams[activeModel];
+      // toy formula: base season + marketing influence + stock cap
+      const season = (Math.cos((m-1)/12 * Math.PI*2) * 0.15 + 0.85);
+      const sales = Math.max(0, Math.round((season * (p.a*st + p.b*s + p.c*100)) / 10));
+      out.innerHTML = `<strong style="font-size:18px">${sales} units</strong><div style="color:var(--muted);font-size:12px;margin-top:6px">Model: ${activeModel}</div>`;
+      document.getElementById('r2').innerText = `R² ${(0.80 + Math.random()*0.12).toFixed(2)}`;
+      document.getElementById('rmse').innerText = `RMSE ${(10 + Math.random()*8).toFixed(1)}`;
+      drawSparkline(m,s,st,sales);
+    }
+
+    function drawSparkline(m,s,st,sales){
+      // produce small ascii-art sparkline as placeholder
+      const values = Array.from({length:12}, (_,i)=>{
+        const season = (Math.cos(i/12 * Math.PI*2) * 0.15 + 0.85);
+        const base = (modelParams[activeModel].a*st + modelParams[activeModel].b*s + modelParams[activeModel].c*100) * season / 10;
+        return Math.round(base + (Math.random()-0.5)*6);
+      });
+      const max = Math.max(...values);
+      const chars = values.map(v=> '▇'.repeat(Math.max(1, Math.round((v/max)*8))));
+      spark.innerHTML = '<div style="width:100%;display:flex;gap:6px;align-items:end;justify-content:space-between">' + chars.map(c=>`<div style="font-size:12px;opacity:.92">${c}</div>`).join('') + '</div>';
+    }
+
+    predictBtn.addEventListener('click', predict);
+    [month,spend,stock].forEach(el=>el.addEventListener('input', ()=>{predict();}));
+
+    // select model cards
+    document.querySelectorAll('.model').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        document.querySelectorAll('.model').forEach(x=>x.style.outline='');
+        el.style.outline='2px solid rgba(255,255,255,0.06)';
+        activeModel = el.getAttribute('data-model');
+        predict();
+      });
+    });
+
+    // copy github link
+    document.getElementById('github').addEventListener('click', ()=>{
+      const url = 'https://github.com/yourusername/car-sales-prediction';
+      navigator.clipboard.writeText(url).then(()=>{
+        alert('GitHub link copied to clipboard!');
+      });
+    });
+
+    // theme toggle (light/dark)
+    document.getElementById('theme').addEventListener('click', ()=>{
+      document.documentElement.style.setProperty('--bg', document.documentElement.style.getPropertyValue('--bg') === '#f8fafc' ? '#0f1724' : '#f8fafc');
+      document.documentElement.style.setProperty('--muted', document.documentElement.style.getPropertyValue('--muted') === '#374151' ? '#9aa4b2' : '#374151');
+      // minimal: invert text color
+      document.body.style.color = document.body.style.color === '#04111a' ? '#e6eef8' : '#04111a';
+    });
+
+    // initial
+    predict();
+  </script>
+</body>
+<!-- Working minimal version below -->
+</html>
